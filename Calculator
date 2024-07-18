@@ -1,0 +1,337 @@
+; Calculator
+; Author: Cas Serrarens, Elista Marinova
+; Made with Tutorial : https://hackmd.io/@CEAssembly/rkWgEVQcF
+; Date : 10/06/24
+; Retouch version the original version was not complete and had error
+: Only Division left to do
+
+
+global _WinMain@16 ; Need to set a start for assembly
+
+section .data ; section to store variables (data)
+    welcome db 0dh, 0ah, 0dh, 0ah, " ****************** Hello and welcome to this calculator ! ************** ", 0dh, 0ah, 0dh, 0ah
+    welcome_length equ $-welcome
+    choice db 0dh, 0ah, "Please make your choice: ", 0dh, 0ah
+    choice_length equ $-choice
+    operator db "1. Add", 0dh, 0ah, "2. Substract" ,0dh,0ah, "3. Multiply", 0dh, 0ah, "4. Divide", 0dh, 0ah, "5. Exit",10
+    operator_length equ $-operator
+    first_number db "Please enter your first number: "
+    first_number_length equ $-first_number
+    second_number db "Please enter your second number: "
+    second_number_length equ $-second_number
+    answer db "Your answer is : "
+    answer_length equ $-answer
+    equals db "="
+    equals_length equ $-equals 
+    plus db "+"
+    plus_length equ $-plus
+    minus db "-"
+    minus_length equ $-minus
+    mult db "*"
+    mult_length equ $-mult
+    tmp: db 0,0
+    first_temp: db 0,0
+    second_temp: db 0,0
+    
+    
+        
+section .text ; Actual code
+
+_start: ; Here assembly start
+
+    call welcome_message ; Just a message to welcome the user
+    call get_choice      ; Lets the user know it has to make a choice
+    call operators	 ; Can let the user choose an operator
+    call get_input
+    call compare_input
+    jmp _WinMain@16
+
+
+
+welcome_message:
+    mov rax, 0x1		; Set sys_call to write
+    mov rdi, 1			; 1 = stdout
+    mov rsi, welcome		; Generate welcome message
+    mov rdx, welcome_length	; Reserve bits for welcome message
+    syscall			; syscall to output the message
+    ret	16			; return back to main loop
+    
+    
+get_choice:
+    mov rax, 0x1		; Set sys_call to write
+    mov rdi, 1			; 1 = stdout
+    mov rsi, choice		; Displays choice message
+    mov rdx, choice_length	; Reserve bits for message message
+    syscall			; syscall to output the message
+    ret	16			; return back to main loop
+
+
+operators:
+    mov rax, 0x1		; Set sys_call to write
+    mov rdi, 1			; 1 = stdout
+    mov rsi, operator		; Displays Operator message
+    mov rdx, operator_length	; Reserve bits for Operator message length
+    syscall			; syscall to output the message
+    ret	16			; return back to main loop
+    
+    
+get_input:		; Made a function to get user input to select operation
+    mov rax, 0		; sys_read
+    mov rdi, 0		; 0 = stdin
+    mov rsi, tmp    	; @ tmp
+    mov rdx, 2		; 2 bytes (one for our numbern another to store newline)
+    syscall
+    ret 16
+    
+    
+
+Add:
+
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, first_number
+    mov rdx, first_number_length
+    syscall
+    
+    mov rax, 0		; sys_read(int fd, void *ptr, int count)
+    mov rdi, 0		; stdin
+    mov rsi, first_temp	; @tmp
+    mov rdx, 2 		; 2 bytes (one for our number, another to store newline)
+    syscall
+    
+    movzx r8, byte [first_temp]
+    
+    mov rax, 0x1
+    mov rdi, 1
+    mov rsi, second_number
+    mov rdx, second_number_length
+    syscall
+    
+    mov rax, 0
+    mov rdi, 0
+    mov rsi, second_temp
+    mov rdx, 2
+    syscall
+    
+    movzx r9, byte [second_temp]
+    
+    
+    push r8	; put r8 and r9 into stack to display these later on
+    push r9
+    
+    mov r8, [first_temp]	; move the contens of the first temporary value into r8
+    mov r9, [second_temp]	; move the contens of the first temporary value into r9
+
+    
+    sub r8, 48			; subtract 48 of the content to get the actual value in ASCII
+    sub r9, 48			; subtract 48 of the content to get the actual value in ASCII
+    
+    
+    mov r10, r8
+    add r10, r9
+    
+    pop r9
+    pop r8
+    add r10, 48
+    
+    add r10, '0'		; Convert integer back to ASCII
+    
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, answer
+    mov rdx, answer_length
+    syscall
+
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, r8
+    mov rdx, 1
+    syscall
+
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, r9
+    mov rdx, 1
+    syscall
+    
+    mov [rsp+8], r10
+    
+    mov rax, 0x1
+    mov rdi, 1
+    lea rsi, [rsp+8]		; Displays operator message
+    mov rdx, 1			; Reserves bits for message length
+    syscall
+    
+    jmp _start
+   
+   
+   
+    
+Substract:
+
+    mov rax, 0x1
+    mov rdi, 1
+    mov rsi, first_number
+    mov rdx, first_number_length
+    syscall
+    
+    mov rax, 0		; sys_read(int fd, void *ptr, int count)
+    mov rdi, 0		; stdin
+    mov rsi, first_temp	; @tmp
+    mov rdx, 2 		; 2 bytes (one for our number, another to store newline)
+    syscall
+    
+    movzx r8, byte [first_temp]
+        
+    sub r8, '0'	 		; Convert ASCII to integer
+    sub r9, '0'			; Convert ASCII to integer
+    
+    mov rax, 0x1
+    mov rdi, 1
+    mov rsi, second_number
+    mov rdx, second_number_length
+    syscall
+    
+    mov rax, 0
+    mov rdi, 0
+    mov rsi, second_temp
+    mov rdx, 2
+    syscall
+    
+    movzx r9, byte [second_temp]
+    
+    sub r8, '0'	 		; Convert ASCII to integer or may 
+    sub r9, '0'			; cause unprintable character    
+    
+    mov r10, r8
+    sub r10, r9			; Substract second number from first number
+    
+    add r10, '0'		; Convert integer into ASCII
+    
+    
+    mov rax, 0x1
+    mov rdi, 1
+    mov rsi, answer
+    mov rdx, answer_length
+    syscall
+    
+    mov rax, 0x1
+    mov rdi, 1
+    mov rsi, r8
+    mov rdx, 1
+    syscall
+    
+    mov rax, 0x1
+    mov rdi, 1
+    mov rsi, r9
+    mov rdx, 1
+    syscall
+    
+    mov [rsp+8], r10
+    
+    mov rax, 0x1
+    mov rdi, 1
+    lea rsi, [rsp+8]		; Displays operator message
+    mov rdx, 1			; Reserves bits for message length
+    syscall
+    
+    jmp _WinMain@16
+    
+    
+    
+Multiply:
+
+    mov rax, 0x1
+    mov rdi, 1
+    mov rsi, first_number
+    mov rdx, first_number_length
+    syscall
+    
+    mov rax, 0		; sys_read(int fd, void *ptr, int count)
+    mov rdi, 0		; stdin
+    mov rsi, first_temp	; @tmp
+    mov rdx, 2 		; 2 bytes (one for our number, another to store newline)
+    syscall
+    
+    movzx r8, byte [first_temp]
+    
+    mov rax, 0x1
+    mov rdi, 1
+    mov rsi, second_number
+    mov rdx, second_number_length
+    syscall
+    
+    mov rax, 0
+    mov rdi, 0
+    mov rsi, second_temp
+    mov rdx, 2
+    syscall
+    
+    movzx r9, byte [second_temp]
+    
+    
+    sub r8, '0'				; Substract it with 0 will cause it 
+    sub r9, '0'				; to convert ASCII to integer
+    
+    mov r10, r8				; Multiplication with imul and store it on r10
+    imul r10, r9   
+    
+    add r10, '0'			; Add it with 0 will cause it to convert integer to ASCII
+    
+    mov rax, 0x1
+    mov rdi, 1
+    mov rsi, answer
+    mov rdx, answer_length
+    syscall
+    
+    mov rax, 0x1
+    mov rdi, 1
+    mov rsi, r8
+    mov rdx, 1
+    syscall
+    
+    mov rax, 0x1
+    mov rdi, 1
+    mov rsi, r9
+    mov rdx, 1
+    syscall
+    
+    mov [rsp+8], r10
+    
+    mov rax, 0x1
+    mov rdi, 1
+    lea rsi, [rsp+8]		; Displays operator message
+    mov rdx, 1			; Reserves bits for message length
+    syscall
+    
+    jmp _WinMain@16
+
+    
+    
+Exit:
+
+    mov rax, 60		; 60 is sys_exit in syscall(2)
+    xor rdi, rdi	; set rdi to 0 for stdin
+    syscall		; syscall registers above
+   
+ 
+compare_input:
+
+cmp byte[tmp], '1'	; Compare user input to 1, if it is true jump to Add function
+    je Add
+
+cmp byte[tmp], '2'
+    je Substract
+
+cmp byte[tmp], '3'
+    je Multiply
+
+;cmp byte[tmp], '4'
+;    je Divide
+
+cmp byte[tmp	], '5'
+    je Exit
+    
+    ret 16
+
+
