@@ -7,7 +7,7 @@
 ; Maybe need a little edit for Windows version, i run it perfectly on a linux machine
 
 
-global _WinMain@16 ; Need to set a start for assembly
+global _start ; Need to set a start for assembly
 
 section .data ; section to store variables (data)
     welcome db 0dh, 0ah, 0dh, 0ah, " ****************** Hello and welcome to this calculator ! ************** ", 0dh, 0ah, 0dh, 0ah
@@ -45,7 +45,7 @@ _start: ; Here assembly start
     call operators	 ; Can let the user choose an operator
     call get_input
     call compare_input
-    jmp _WinMain@16
+    jmp _start
 
 
 
@@ -55,7 +55,7 @@ welcome_message:
     mov rsi, welcome		; Generate welcome message
     mov rdx, welcome_length	; Reserve bits for welcome message
     syscall			; syscall to output the message
-    ret	16			; return back to main loop
+    ret      		; return back to main loop
     
     
 get_choice:
@@ -64,7 +64,7 @@ get_choice:
     mov rsi, choice		; Displays choice message
     mov rdx, choice_length	; Reserve bits for message message
     syscall			; syscall to output the message
-    ret	16			; return back to main loop
+    ret    			; return back to main loop
 
 
 operators:
@@ -73,7 +73,7 @@ operators:
     mov rsi, operator		; Displays Operator message
     mov rdx, operator_length	; Reserve bits for Operator message length
     syscall			; syscall to output the message
-    ret	16			; return back to main loop
+    ret    			; return back to main loop
     
     
 get_input:		; Made a function to get user input to select operation
@@ -82,7 +82,7 @@ get_input:		; Made a function to get user input to select operation
     mov rsi, tmp    	; @ tmp
     mov rdx, 2		; 2 bytes (one for our numbern another to store newline)
     syscall
-    ret 16
+    ret
     
     
 
@@ -236,7 +236,7 @@ Substract:
     mov rdx, 1			; Reserves bits for message length
     syscall
     
-    jmp _WinMain@16
+    jmp _start
     
     
     
@@ -305,7 +305,7 @@ Multiply:
     mov rdx, 1			; Reserves bits for message length
     syscall
     
-    jmp _WinMain@16
+    jmp _start
 
     
     
@@ -333,6 +333,6 @@ cmp byte[tmp], '3'
 cmp byte[tmp	], '5'
     je Exit
     
-    ret 16
+    ret
 
 
