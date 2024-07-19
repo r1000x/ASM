@@ -3,7 +3,8 @@
 ; Made with Tutorial : https://hackmd.io/@CEAssembly/rkWgEVQcF
 ; Date : 10/06/24
 ; Retouch version the original version was not complete and had error
-: Only Division left to do
+; Only Division left to do
+; Maybe need a little edit for Windows version, i run it perfectly on a linux machine
 
 
 global _WinMain@16 ; Need to set a start for assembly
